@@ -1,4 +1,4 @@
-name: Deploy Flask App
+name: CI/CD Flask + Terraform
 
 on:
   push:
@@ -9,50 +9,50 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1. Comprueba sintaxis en Python (opcional pero recomendado)
-      - name: Lint Python
-        run: |
-          pip install flake8
-          flake8 . || true
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      # 2. Copiar solo archivos necesarios
+      - name: Terraform Init & Apply
+        run: |
+          cd iac
+          terraform init
+          terraform apply -auto-approve \
+            -var="ssh_public_key=$SSH_PUBLIC_KEY" \
+            -var="ssh_ip=${{ secrets.MY_IP }}"
+
+      - name: Get EC2 IP
+        run: |
+          cd iac
+          echo "SERVER_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+
       - name: Copy project to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
+          host: ${{ env.SERVER_IP }}
+          username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "./"
-          target: "/var/www/mi_web"
-          strip_components: 0
+          target: "/home/ubuntu/mi_web"
 
-      # 3. Construir y reiniciar contenedor en EC2
       - name: Deploy container on EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
+          host: ${{ env.SERVER_IP }}
+          username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /var/www/mi_web
-
-            # detener contenedor previo si existe
+            cd ~/mi_web
             docker stop mi_web || true
             docker rm mi_web || true
-
-            # reconstruir imagen
             docker build -t mi_web_app .
-
-            # iniciar nuevo contenedor
-            docker run -d \
-              --name mi_web \
-              -p 5000:5000 \
-              --restart always \
-              mi_web_app
-
-            # limpiar contenedores e imágenes viejas
-            docker system prune -f
+            docker run -d --name mi_web -p 5000:5000 --restart always mi_web_app

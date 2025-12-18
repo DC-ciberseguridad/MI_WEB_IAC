@@ -2,14 +2,11 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
-variable "ami_id" {
-  description = "Ubuntu 22.04 AMI"
-}
-
-variable "public_key_path" {
-  description = "Path to SSH public key"
+variable "ssh_public_key" {
+  description = "SSH public key for EC2"
+  type        = string
 }
 
 variable "ssh_ip" {
-  description = "Your IP /32"
+  description = "IP allowed to SSH (x.x.x.x/32)"
 }
