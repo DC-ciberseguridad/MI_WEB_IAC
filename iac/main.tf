@@ -58,6 +58,10 @@ resource "aws_instance" "web" {
   key_name               = aws_key_pair.deploy.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   tags = {
     Name = "mi-web"
   }
