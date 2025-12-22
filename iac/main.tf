@@ -62,6 +62,21 @@ resource "aws_instance" "web" {
   key_name               = aws_key_pair.deploy.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
+user_data = <<-EOF
+              #!/bin/bash
+              set -e
+
+              apt-get update
+              apt-get install -y ca-certificates curl gnupg lsb-release
+
+              curl -fsSL https://get.docker.com | sh
+
+              usermod -aG docker ubuntu
+
+              systemctl enable docker
+              systemctl start docker
+              EOF  
+  
   lifecycle {
     prevent_destroy = true
   }
