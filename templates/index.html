@@ -2,10 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi primera web</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Mi Web DevOps</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>¡Hola mundo desde Python + Flask + GitHub Actions!</h1>
+
+    <div class="container">
+        <div class="card">
+            <h1>🚀 Mi Web DevOps</h1>
+            <p class="subtitle">
+                Flask + Docker + Terraform + GitHub Actions
+            </p>
+
+            <div class="tech">
+                <span>🐍 Python</span>
+                <span>🐳 Docker</span>
+                <span>☁️ AWS</span>
+                <span>⚙️ Terraform</span>
+                <span>🔁 CI/CD</span>
+            </div>
+
+            <p class="description">
+                Esta aplicación fue desplegada automáticamente usando
+                Infraestructura como Código y un pipeline CI/CD real.
+            </p>
+
+            <a href="https://github.com/DC-ciberseguridad/MI_WEB_IAC" target="_blank" class="button">
+                Ver repositorio
+            </a>
+        </div>
+
+        <footer>
+            <p>© 2025 · Proyecto DevOps · Hecho con ❤️</p>
+        </footer>
+    </div>
+
 </body>
 </html>
