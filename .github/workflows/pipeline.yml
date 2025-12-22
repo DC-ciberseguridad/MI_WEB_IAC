@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "iac/**"
-      - "app.py"
-      - "Dockerfile"
-      - "requirements.txt"
-      - "templates/**"
-      - "static/**"
 
 jobs:
 # ========================== 
@@ -68,7 +61,7 @@ jobs:
       - name: Copy project to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ env.SERVER_IP }}
+          host: ${{ needs.infra.outputs.server_ip }}
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "./"
