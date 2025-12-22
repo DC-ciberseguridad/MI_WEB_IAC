@@ -25,6 +25,10 @@ data "aws_ami" "ubuntu" {
 resource "aws_key_pair" "deploy" {
   key_name   = "github-deploy"
   public_key = var.ssh_public_key
+  
+  lifecycle {
+    ignore_changes = [public_key]
+  }
 }
 
 resource "aws_security_group" "web_sg" {
