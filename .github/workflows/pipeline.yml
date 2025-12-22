@@ -68,16 +68,13 @@ jobs:
       - name: Copy project to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ needs.infra.outputs.server_ip }}
+          host: ${{ env.SERVER_IP }}
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: |
-            app.py
-            Dockerfile
-            requirements.txt
-            templates
-            static
+          source: "./"
           target: "/home/ubuntu/mi_web"
+          strip_components: 0
+
 
       - name: Deploy container on EC2
         uses: appleboy/ssh-action@v0.1.7

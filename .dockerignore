@@ -1,6 +1,23 @@
+# Git
 .git
 .github
+
+# Terraform / IaC
+iac
+.terraform
+.terraform.lock.hcl
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Python
 __pycache__
 *.pyc
+*.pyo
+
+# OS / editor
+.DS_Store
+.vscode
 *.log
-.env
