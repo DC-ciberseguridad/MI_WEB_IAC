@@ -57,29 +57,23 @@ resource "aws_security_group" "web_sg" {
 }
 
 resource "aws_instance" "web" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
-  key_name               = aws_key_pair.deploy.key_name
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+  key_name      = aws_key_pair.deploy.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
-user_data = <<-EOF
-              #!/bin/bash
-              set -e
+  user_data = <<-EOF
+    #!/bin/bash
+    set -e
+    apt-get update
+    apt-get install -y ca-certificates curl
+    curl -fsSL https://get.docker.com | sh
+    systemctl enable docker
+    systemctl start docker
+    usermod -aG docker ubuntu
+  EOF
 
-              apt-get update
-              apt-get install -y ca-certificates curl gnupg lsb-release
-
-              curl -fsSL https://get.docker.com | sh
-
-              usermod -aG docker ubuntu
-
-              systemctl enable docker
-              systemctl start docker
-              EOF  
-  
-  lifecycle {
-    prevent_destroy = true
-  }
+  user_data_replace_on_change = true
 
   tags = {
     Name = "mi-web"
