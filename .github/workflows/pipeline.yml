@@ -29,6 +29,8 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init & Apply
+        env:
+            SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
         run: |
           cd iac
           terraform init
