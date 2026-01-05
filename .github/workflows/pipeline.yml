@@ -28,6 +28,10 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Get Runner IP
+        run: |
+          echo "MY_IP=$(curl -s https://ifconfig.me)/32" >> $GITHUB_ENV
+  
       - name: Terraform Init & Apply
         env:
             SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
@@ -36,6 +40,7 @@ jobs:
           terraform init
           terraform apply -auto-approve \
             -var="ssh_public_key=$SSH_PUBLIC_KEY" \
+            -var="ssh_ip=$MY_IP"
 
       - name: Get EC2 IP
         id: ec2_ip
@@ -73,6 +78,12 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+
+            echo "Waiting for Docker..."
+            until command -v docker >/dev/null 2>&1; do
+              sleep 5
+            done   
+
             cd ~/mi_web
             sudo docker stop mi_web || true
             sudo docker rm mi_web || true

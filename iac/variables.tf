@@ -9,4 +9,5 @@ variable "ssh_public_key" {
 
 variable "ssh_ip" {
   description = "IP allowed to SSH (x.x.x.x/32)"
+  type        = string
 }
