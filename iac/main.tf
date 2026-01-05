@@ -25,7 +25,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_key_pair" "deploy" {
   key_name   = "github-deploy"
   public_key = var.ssh_public_key
-  
+
   lifecycle {
     ignore_changes = [public_key]
   }
@@ -65,11 +65,28 @@ resource "aws_instance" "web" {
   user_data = <<-EOF
     #!/bin/bash
     set -e
-    apt-get update
-    apt-get install -y ca-certificates curl
-    curl -fsSL https://get.docker.com | sh
+
+    apt-get update -y
+    apt-get install -y ca-certificates curl gnupg lsb-release
+
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+      gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+      https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" \
+      > /etc/apt/sources.list.d/docker.list
+
+    apt-get update -y
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    systemctl enable containerd
     systemctl enable docker
+    systemctl start containerd
     systemctl start docker
+
     usermod -aG docker ubuntu
   EOF
 
@@ -79,3 +96,4 @@ resource "aws_instance" "web" {
     Name = "mi-web"
   }
 }
+
