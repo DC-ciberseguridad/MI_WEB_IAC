@@ -70,7 +70,6 @@ jobs:
           target: "/home/ubuntu/mi_web"
           strip_components: 0
 
-
       - name: Deploy container on EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -78,11 +77,22 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            echo "Waiting for Docker service..."
 
-            echo "Waiting for Docker..."
-            until command -v docker >/dev/null 2>&1; do
+            # Esperar a que systemd registre docker
+            until systemctl list-unit-files | grep -q docker.service; do
               sleep 5
-            done   
+            done
+
+            # Asegurar que docker esté iniciado
+            sudo systemctl start docker
+
+            # Esperar a que el socket exista
+            until [ -S /var/run/docker.sock ]; do
+              sleep 5
+            done
+
+            sudo systemctl status docker --no-pager
 
             cd ~/mi_web
             sudo docker stop mi_web || true
