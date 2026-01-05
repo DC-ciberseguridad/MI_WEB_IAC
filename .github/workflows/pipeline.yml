@@ -36,7 +36,6 @@ jobs:
           terraform init
           terraform apply -auto-approve \
             -var="ssh_public_key=$SSH_PUBLIC_KEY" \
-            -var="ssh_ip=$MY_IP"
 
       - name: Get EC2 IP
         id: ec2_ip
@@ -71,7 +70,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ needs.infra.outputs.server_ip }}
-          username: ubuntus
+          username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/mi_web
